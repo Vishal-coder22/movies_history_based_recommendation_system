@@ -1,0 +1,117 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button, Card, ErrorBanner } from '../components/ui'
+import api, { errorMessage } from '../services/api'
+
+export default function Register({ onSignIn }) {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirm: '',
+  })
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const update = (field) => (event) =>
+    setForm((prev) => ({ ...prev, [field]: event.target.value }))
+
+  const submit = async (event) => {
+    event.preventDefault()
+    setError('')
+    if (!form.name.trim()) return setError('Please enter your name.')
+    if (!form.email.trim()) return setError('Please enter your email address.')
+    if (form.password.length < 8)
+      return setError('Your password must be at least 8 characters long.')
+    if (form.password !== form.confirm)
+      return setError('The passwords you entered do not match.')
+
+    setBusy(true)
+    try {
+      const { data } = await api.post('/auth/register', {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      })
+      onSignIn(data)
+      navigate('/')
+    } catch (err) {
+      setError(errorMessage(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
+      <Card className="w-full max-w-md">
+        <h1 className="text-2xl font-semibold text-amber-400">CineMine</h1>
+        <p className="mt-1 text-sm text-slate-400">Create your account</p>
+        <ErrorBanner>{error}</ErrorBanner>
+        <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-slate-300">
+              Name
+            </label>
+            <input
+              id="name"
+              autoComplete="name"
+              value={form.name}
+              onChange={update('name')}
+              className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-slate-300">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              onChange={update('email')}
+              className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              value={form.password}
+              onChange={update('password')}
+              className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="confirm" className="block text-sm font-medium text-slate-300">
+              Confirm password
+            </label>
+            <input
+              id="confirm"
+              type="password"
+              autoComplete="new-password"
+              value={form.confirm}
+              onChange={update('confirm')}
+              className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-500"
+            />
+          </div>
+          <Button type="submit" disabled={busy} className="w-full">
+            {busy ? 'Creating account…' : 'Register'}
+          </Button>
+        </form>
+        <p className="mt-4 text-sm text-slate-400">
+          Already registered?{' '}
+          <Link to="/login" className="text-amber-400 hover:text-amber-300">
+            Login
+          </Link>
+        </p>
+      </Card>
+    </div>
+  )
+}
