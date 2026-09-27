@@ -286,3 +286,93 @@ class ImportRepository:
             report.pop("report_id", None)
             report.pop("import_id", None)
         return report
+
+    @staticmethod
+    def quality_totals(conn, user_id: int) -> dict:
+        """Aggregate quality reports across a user's confirmed/cleaned imports."""
+        row = conn.execute(
+            """
+            SELECT COUNT(*) AS imports,
+                   COALESCE(SUM(r.duplicate_rows), 0)   AS duplicates_removed,
+                   COALESCE(SUM(r.missing_movie_rows), 0) AS missing_values,
+                   COALESCE(SUM(r.invalid_rows), 0)     AS invalid_rows,
+                   COALESCE(SUM(r.ambiguous_rows), 0)   AS ambiguous_rows,
+                   COALESCE(SUM(r.unmatched_rows), 0)   AS unmatched_rows
+            FROM import_runs i
+            LEFT JOIN data_quality_reports r ON r.import_id = i.import_id
+            WHERE i.user_id = ?
+            """,
+            (user_id,),
+        ).fetchone()
+        return _row(row) or {}
+
+
+class MiningRepository:
+    @staticmethod
+    def create_run(conn, user_id: int, algorithm: str, parameters: dict, metrics: dict) -> int:
+        cursor = conn.execute(
+            "INSERT INTO mining_runs (user_id, algorithm, parameters_json, metrics_json) "
+            "VALUES (?, ?, ?, ?)",
+            (user_id, algorithm, json.dumps(parameters), json.dumps(metrics)),
+        )
+        return cursor.lastrowid
+
+    @staticmethod
+    def save_kmeans(conn, run_id: int, assignments: list[dict], profiles: list[dict]) -> None:
+        conn.executemany(
+            "INSERT INTO kmeans_results (run_id, movie_id, cluster_id) VALUES (?, ?, ?)",
+            [(run_id, a["movie_id"], a["cluster_id"]) for a in assignments],
+        )
+        conn.executemany(
+            "INSERT INTO cluster_profiles (run_id, cluster_id, cluster_size, average_rating, "
+            " average_movies_watched, dominant_genre, silhouette_score) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [
+                (
+                    run_id,
+                    p["cluster_id"],
+                    p["cluster_size"],
+                    p["average_rating"],
+                    p.get("average_movies_watched"),
+                    p["dominant_genre"],
+                    p.get("silhouette_score"),
+                )
+                for p in profiles
+            ],
+        )
+
+    @staticmethod
+    def save_rules(conn, run_id: int, rules: list[dict]) -> None:
+        conn.executemany(
+            "INSERT INTO apriori_rules (run_id, antecedent, consequent, support, confidence, lift) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                (run_id, r["antecedent"], r["consequent"], r["support"], r["confidence"], r["lift"])
+                for r in rules
+            ],
+        )
+
+    @staticmethod
+    def save_naive_bayes(conn, run_id: int, probabilities: list[dict]) -> None:
+        conn.executemany(
+            "INSERT INTO naive_bayes_results (run_id, genre, probability) VALUES (?, ?, ?)",
+            [(run_id, p["genre"], p["probability"]) for p in probabilities],
+        )
+
+    @staticmethod
+    def list_runs(conn, user_id: int, limit: int = 50) -> list[dict]:
+        rows = conn.execute(
+            "SELECT run_id, algorithm, parameters_json, metrics_json, status, created_at "
+            "FROM mining_runs WHERE user_id = ? ORDER BY run_id DESC LIMIT ?",
+            (user_id, limit),
+        ).fetchall()
+        runs = []
+        for row in rows:
+            run = dict(row)
+            for key in ("parameters_json", "metrics_json"):
+                try:
+                    run[key.replace("_json", "")] = json.loads(run.pop(key) or "{}")
+                except ValueError:
+                    run.pop(key, None)
+            runs.append(run)
+        return runs

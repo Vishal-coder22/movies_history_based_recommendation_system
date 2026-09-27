@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from app.config import DATA_DIR, MOVIES_CSV, UPLOAD_DIR
 from app.database.connection import init_db
 from app.errors import UserError
-from app.routes import auth, movies, upload
+from app.routes import analytics, auth, mining, movies, upload
 
 
 @asynccontextmanager
@@ -49,6 +49,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(upload.router)
 app.include_router(movies.router)
+app.include_router(analytics.router)
+app.include_router(mining.router)
 
 
 @app.get("/api/health")
