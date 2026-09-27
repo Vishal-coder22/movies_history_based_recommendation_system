@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import DATA_DIR, MOVIES_CSV, UPLOAD_DIR
 from app.database.connection import init_db
+from app.routes import auth
 
 
 @asynccontextmanager
@@ -37,6 +38,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth.router)
 
 
 @app.get("/api/health")

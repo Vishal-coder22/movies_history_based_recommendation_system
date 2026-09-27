@@ -11,11 +11,13 @@ UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
 MAX_MASTER_MOVIES = 5000
 MAX_FILE_SIZE_MB = 10
 
-JWT_SECRET = os.environ.get("CINEMINE_JWT_SECRET", "dev-secret-change-in-production")
+JWT_SECRET = os.environ.get(
+    "CINEMINE_JWT_SECRET", "cinemine-local-dev-secret-0123456789abcdef"
+)
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
 RATING_MIN = 0.0
 RATING_MAX = 5.0
 
-BCRYPT_ROUNDS = 12
+BCRYPT_ROUNDS = int(os.environ.get("CINEMINE_BCRYPT_ROUNDS", "12"))

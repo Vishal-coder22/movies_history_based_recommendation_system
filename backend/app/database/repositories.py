@@ -1,10 +1,27 @@
-from app.database.connection import connect
-
-
 def _movie_dict(row) -> dict | None:
     if row is None:
         return None
     return dict(row)
+
+
+class UserRepository:
+    @staticmethod
+    def create(conn, name: str, email: str, password_hash: str) -> int:
+        cursor = conn.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+            (name, email, password_hash),
+        )
+        return cursor.lastrowid
+
+    @staticmethod
+    def get_by_email(conn, email: str) -> dict | None:
+        row = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        return dict(row) if row else None
+
+    @staticmethod
+    def get_by_id(conn, user_id: int) -> dict | None:
+        row = conn.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
+        return dict(row) if row else None
 
 
 class MovieRepository:

@@ -15,6 +15,8 @@ os.environ["CINEMINE_DB_PATH"] = os.path.join(_TEST_DIR, "test.db")
 os.environ["CINEMINE_SEED_CSV"] = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "fixtures", "movies_small.csv"
 )
+# Fast hashing for tests (the app default remains the production-safe value).
+os.environ.setdefault("CINEMINE_BCRYPT_ROUNDS", "4")
 atexit.register(shutil.rmtree, _TEST_DIR, ignore_errors=True)
 
 import pytest  # noqa: E402
