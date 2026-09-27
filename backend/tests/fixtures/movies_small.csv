@@ -1,0 +1,26 @@
+movie_id,title,release_year,genres,overview,runtime,popularity,vote_average,vote_count
+1,The Shawshank Redemption,1994,Drama,Two imprisoned men bond over hope.,142.0,80.0,9.3,24000
+2,The Godfather,1972,Crime|Drama,A patriarch transfers power to his son.,175.0,70.0,9.2,19000
+3,The Dark Knight,2008,Action|Crime|Drama,Batman faces the Joker.,152.0,90.0,9.0,30000
+4,The Dark Knight Rises,2012,Action|Drama,Batman returns to save Gotham.,165.0,85.0,8.4,22000
+5,Inception,2010,Action|Science Fiction,A thief enters dreams.,148.0,95.0,8.8,33000
+6,Interstellar,2014,Adventure|Drama|Science Fiction,Explorers travel through a wormhole.,169.0,88.0,8.6,26000
+7,Titanic,1997,Drama|Romance,An ocean liner meets disaster.,195.0,78.0,7.9,18000
+8,Avatar,2009,Action|Adventure|Science Fiction,Humans colonize Pandora.,162.0,92.0,7.9,29000
+9,The Matrix,1999,Action|Science Fiction,A hacker discovers reality.,136.0,84.0,8.7,25000
+10,Deadpool,2016,Action|Comedy,A mercenary seeks revenge.,108.0,74.0,8.0,21000
+11,Toy Story,1995,Animation|Family,Toys come to life.,81.0,66.0,8.3,15000
+12,Get Out,2017,Horror|Mystery|Thriller,A young man meets his girlfriend's family.,104.0,62.0,7.7,14000
+13,Parasite,2019,Drama|Thriller,A family cons its way into a household.,132.0,82.0,8.5,17000
+14,Coco,2017,Animation|Family|Fantasy,A boy enters the land of the dead.,105.0,70.0,8.4,16000
+15,Whiplash,2014,Drama|Music,A drummer pushes his limits.,106.0,58.0,8.5,13000
+16,Logan,2017,Action|Drama|Science Fiction,A weary mutant protects a young girl.,137.0,76.0,8.1,20000
+17,Gladiator,2000,Action|Adventure|Drama,A general becomes a arena fighter.,155.0,80.0,8.5,23000
+18,Forrest Gump,1994,Drama|Romance,A kind man witnesses history.,142.0,72.0,8.8,19000
+19,The Revenant,2015,Action|Adventure|Drama,A frontiersman survives the wild.,156.0,68.0,7.7,16000
+20,Joker,2019,Crime|Drama|Thriller,A failed comedian becomes infamous.,122.0,86.0,8.4,25000
+21,Up,2009,Animation|Adventure|Comedy,An old man floats his house away.,96.0,64.0,8.3,15000
+22,The Wolf of Wall Street,2013,Comedy|Crime|Drama,A stockbroker rises and falls.,180.0,70.0,8.2,18000
+23,1917,2019,Drama|War,Two soldiers cross no-man's land.,119.0,66.0,8.2,14000
+24,Soul,2020,Animation|Family|Fantasy,A musician finds his purpose.,100.0,60.0,8.1,12000
+25,Dune,2021,Adventure|Science Fiction,A noble family fights for a desert planet.,155.0,83.0,7.8,21000

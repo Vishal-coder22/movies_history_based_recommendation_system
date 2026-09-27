@@ -1,0 +1,14 @@
+fastapi==0.141.1
+uvicorn==0.54.0
+pandas==3.0.6
+numpy==2.5.3
+scikit-learn==1.9.1
+mlxtend==0.25.0
+pdfplumber==0.11.10
+PyJWT==2.15.0
+passlib==1.7.4
+bcrypt==4.2.1
+python-multipart==0.0.32
+httpx==0.28.1
+pytest==9.1.1
+httpx2==2.13.1
