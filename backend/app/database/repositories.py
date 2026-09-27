@@ -31,6 +31,13 @@ class MovieRepository:
         return conn.execute("SELECT COUNT(*) FROM movies").fetchone()[0]
 
     @staticmethod
+    def get_all(conn) -> list[dict]:
+        rows = conn.execute(
+            "SELECT * FROM movies ORDER BY movie_id"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    @staticmethod
     def get_by_id(conn, movie_id: int) -> dict | None:
         return _row(conn.execute("SELECT * FROM movies WHERE movie_id = ?", (movie_id,)).fetchone())
 
@@ -376,3 +383,25 @@ class MiningRepository:
                     run.pop(key, None)
             runs.append(run)
         return runs
+
+
+class RecommendationRepository:
+    @staticmethod
+    def replace(conn, user_id: int, items: list[dict]) -> None:
+        """Replace the user's stored recommendation set with the latest top-N."""
+        conn.execute("DELETE FROM recommendations WHERE user_id = ?", (user_id,))
+        conn.executemany(
+            "INSERT INTO recommendations (user_id, movie_id, score, reason) VALUES (?, ?, ?, ?)",
+            [(user_id, item["movie_id"], item["score"], item["reason"]) for item in items],
+        )
+
+    @staticmethod
+    def get_recent(conn, user_id: int, limit: int = 50) -> list[dict]:
+        rows = conn.execute(
+            "SELECT r.movie_id, r.score, r.reason, r.created_at, m.title, m.release_year, "
+            "       m.vote_average "
+            "FROM recommendations r JOIN movies m ON m.movie_id = r.movie_id "
+            "WHERE r.user_id = ? ORDER BY r.score DESC, r.movie_id LIMIT ?",
+            (user_id, limit),
+        ).fetchall()
+        return [dict(row) for row in rows]

@@ -14,7 +14,7 @@ DEFAULT_MIN_CONFIDENCE = 0.3
 MAX_RULES = 50
 
 
-def _genre_transactions(conn) -> pd.DataFrame:
+def genre_transactions(conn) -> pd.DataFrame:
     rows = conn.execute(
         "SELECT movie_id, genres FROM movies WHERE genres IS NOT NULL AND genres != ''"
     ).fetchall()
@@ -45,7 +45,7 @@ def run_apriori(
     if min_lift is not None and min_lift < 0:
         raise UserError("Minimum lift must be 0 or greater.")
 
-    transactions = _genre_transactions(conn)
+    transactions = genre_transactions(conn)
     if len(transactions) == 0:
         raise UserError("The catalogue has no genre data to mine.")
 
