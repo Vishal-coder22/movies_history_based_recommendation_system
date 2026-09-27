@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS import_runs (
     user_id    INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     file_name  TEXT NOT NULL,
     file_type  TEXT NOT NULL CHECK (file_type IN ('csv', 'pdf')),
+    columns_json TEXT,
     status     TEXT NOT NULL DEFAULT 'uploaded',
     total_rows INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS import_records (
     record_id        INTEGER PRIMARY KEY AUTOINCREMENT,
     import_id        INTEGER NOT NULL REFERENCES import_runs(import_id) ON DELETE CASCADE,
     raw_movie_title  TEXT,
+    raw_movie_id     TEXT,
     raw_rating       REAL,
     normalized_title TEXT,
     matched_movie_id INTEGER REFERENCES movies(movie_id),

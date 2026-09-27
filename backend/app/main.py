@@ -3,10 +3,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import DATA_DIR, MOVIES_CSV, UPLOAD_DIR
 from app.database.connection import init_db
-from app.routes import auth
+from app.errors import UserError
+from app.routes import auth, movies, upload
 
 
 @asynccontextmanager
@@ -31,6 +33,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="CineMine", version="1.0.0", lifespan=lifespan)
 
+
+@app.exception_handler(UserError)
+def user_error_handler(request, error: UserError):
+    return JSONResponse(status_code=error.status_code, content={"detail": error.message})
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
@@ -40,6 +47,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(upload.router)
+app.include_router(movies.router)
 
 
 @app.get("/api/health")

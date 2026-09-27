@@ -17,7 +17,7 @@ def connect(db_path: str | None = None) -> sqlite3.Connection:
     parent = os.path.dirname(path)
     if parent:
         os.makedirs(parent, exist_ok=True)
-    conn = sqlite3.connect(path, timeout=5)
+    conn = sqlite3.connect(path, timeout=5, check_same_thread=False)
     _configure(conn)
     return conn
 
