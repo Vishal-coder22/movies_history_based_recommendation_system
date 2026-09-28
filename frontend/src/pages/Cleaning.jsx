@@ -76,7 +76,7 @@ function MatchReview({ record, selected, touched, onChange }) {
               <label
                 key={option.movie_id}
                 className={`flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 text-sm transition-colors ${
-                  value === option.movie_id
+                  selected === option.movie_id
                     ? 'border-amber-600 bg-amber-950/40 text-slate-100'
                     : 'border-slate-800 text-slate-300 hover:border-slate-600'
                 }`}
