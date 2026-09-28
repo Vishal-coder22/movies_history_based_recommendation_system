@@ -2,6 +2,7 @@ import csv
 
 from app.config import MAX_MASTER_MOVIES, MOVIES_CSV
 from app.database.connection import connect
+from app.services.auth_service import hash_password
 
 
 def normalize_title(title: str) -> str:
@@ -87,5 +88,22 @@ def seed_movies(csv_path: str | None = None, db_path: str | None = None) -> int:
         )
         conn.commit()
         return len(movies)
+    finally:
+        conn.close()
+
+
+def seed_demo_user(db_path: str | None = None) -> int | None:
+    """Create the demo account if it doesn't exist. Idempotent."""
+    from app.database.repositories import UserRepository
+    conn = connect(db_path)
+    try:
+        existing = UserRepository.get_by_email(conn, "demo@cinemine.dev")
+        if existing:
+            return None
+        user_id = UserRepository.create(
+            conn, "Demo User", "demo@cinemine.dev", hash_password("secret123")
+        )
+        conn.commit()
+        return user_id
     finally:
         conn.close()

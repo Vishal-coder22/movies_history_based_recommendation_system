@@ -32,30 +32,64 @@ personalised recommendations — through a clean React dashboard.
   and audience quality, each with a human-readable "why this was recommended" reason.
   Watched movies are never recommended.
 
-## Getting started
+## Run the project (3 steps)
 
-Prerequisites: Python 3.12+, Node 18+, npm.
+> One-time setup (only if `.venv` or `node_modules` is missing):
+> `python -m venv .venv`, `.\.venv\Scripts\pip install -r backend\requirements.txt`,
+> `cd frontend; npm install; cd ..` — `start.ps1` does the frontend install for you.
 
+**Step 1** — open PowerShell and go to the project folder:
 ```powershell
-# 1. Backend virtualenv + dependencies
-python -m venv .venv
-.\.venv\Scripts\pip install -r backend\requirements.txt
-
-# 2. Frontend dependencies (first run)
-cd frontend; npm install; cd ..
-
-# 3. Run both servers
-.\start.ps1
+cd C:\Users\visha\moviesforfuture
 ```
 
-- Frontend: http://localhost:5173
-- Backend API + Swagger docs: http://127.0.0.1:8000/docs
+**Step 2** — start both servers with one command:
+```powershell
+.\start.ps1
+```
+Wait for two green lines:
+```
+[1/2] Backend  OK   http://127.0.0.1:8000  (4803 movies loaded)
+[2/2] Frontend OK   http://localhost:5173
+```
+If a server fails, the same window prints the real error and how to fix it.
 
-`.\start.ps1 -Backend` or `.\start.ps1 -Frontend` starts just one side.
+**Step 3** — open **http://localhost:5173** in your browser:
+- Login: `demo@cinemine.dev` / `secret123` (already has data), or register a new account.
+
+**Stop:** press **ENTER** in the `start.ps1` window — or, from another
+PowerShell window, run `.\stop.ps1`.
+
+`.\start.ps1 -Backend` / `.\start.ps1 -Frontend` starts only one side.
 
 The database (`backend/data/cinemine.db`) and the movie catalogue
 (`backend/seed/tmdb_5000_movies.csv`, max 5,000 rows) are created automatically on
-first start.
+first start. Server logs land in `logs/` and stream live into the `start.ps1` window.
+
+### Troubleshooting
+
+| You see | What it means | Fix |
+|---|---|---|
+| `ECONNREFUSED 127.0.0.1:8000` or *proxy error* in the Vite terminal | Frontend is up, **backend is not running** | Run `.\start.ps1` (keep its window open) |
+| Red banner: *Backend is not running* | Same as above — the app re-checks every 10s and fixes itself once the backend is up | Run `.\start.ps1` |
+| `[FAIL] Port 8000 is already in use` | An old server is still running | `.\stop.ps1` then `.\start.ps1` |
+| `[FAIL] Backend did not answer within 60 seconds` | The window shows the backend's real error below the FAIL line | Read the error; common fix: `.\stop.ps1` then `.\start.ps1` |
+| Blank page at `localhost:5173` | Frontend still starting | Wait 5 seconds and reload; check the `start.ps1` window for `[FAIL]` |
+| *Running scripts is disabled on this system* | PowerShell policy blocked the script | `Set-ExecutionPolicy -Scope Process Bypass` then retry |
+| Window flashed and closed | You double-clicked the script; errors need a readable window | Open PowerShell, `cd C:\Users\visha\moviesforfuture`, `.\start.ps1` |
+
+### Start the two servers manually (optional)
+
+```powershell
+# Window 1 - backend
+cd C:\Users\visha\moviesforfuture\backend
+& "C:\Users\visha\moviesforfuture\.venv\Scripts\python.exe" -m uvicorn app.main:app --port 8000 --no-access-log
+
+# Window 2 - frontend
+cd C:\Users\visha\moviesforfuture\frontend
+npm run dev
+```
+Stop each with `Ctrl+C`, or from a third window: `.\stop.ps1`.
 
 ## Demo data
 
@@ -108,6 +142,8 @@ moviesforfuture/
 │       ├── components/      # Navbar, charts, cards, ui primitives
 │       └── services/api.js  # Axios instance with auth interceptor
 ├── samples/                 # demo upload files
-├── start.ps1                # run backend + frontend
+├── logs/                    # server logs written by start.ps1 (git-ignored)
+├── start.ps1                # ONE command: start backend + frontend, ENTER stops both
+├── stop.ps1                 # ONE command: stop everything, frees ports
 └── test.ps1                 # run the test suite
 ```

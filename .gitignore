@@ -17,6 +17,9 @@ node_modules/
 dist/
 .vite/
 
+# Server logs (written by start.ps1)
+logs/
+
 # Env / IDE
 .env
 .idea/

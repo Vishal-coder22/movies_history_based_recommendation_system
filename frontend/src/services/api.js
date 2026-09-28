@@ -3,7 +3,8 @@ import axios from 'axios'
 const TOKEN_KEY = 'cinemine_token'
 const USER_KEY = 'cinemine_user'
 
-const api = axios.create({ baseURL: '/api' })
+const baseURL = import.meta.env.VITE_API_URL || '/api'
+const api = axios.create({ baseURL })
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY)
@@ -28,7 +29,13 @@ api.interceptors.response.use(
 )
 
 export function errorMessage(error) {
-  const detail = error?.response?.data?.detail
+  if (!error?.response) {
+    const isDev = import.meta.env.DEV
+    return isDev
+      ? 'Cannot reach the backend server. Open PowerShell in the project folder and run .\\start.ps1'
+      : 'Cannot reach the server. Please check your connection and try again.'
+  }
+  const detail = error.response.data?.detail
   if (typeof detail === 'string') return detail
   if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg
   return 'Something went wrong. Please try again.'

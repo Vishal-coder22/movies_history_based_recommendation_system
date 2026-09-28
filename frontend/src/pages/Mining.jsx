@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import {
   ClusterCard,
   ProbabilityList,
-  RuleTable,
 } from '../components/MiningCards'
 import {
   Button,
@@ -16,7 +15,6 @@ import api, { errorMessage } from '../services/api'
 
 const TABS = [
   { id: 'kmeans', label: 'K-Means' },
-  { id: 'apriori', label: 'Apriori' },
   { id: 'naive_bayes', label: 'Naive Bayes' },
 ]
 
@@ -36,11 +34,15 @@ function Field({ id, label, hint, ...props }) {
   )
 }
 
+const HISTORY_LABELS = {
+  kmeans: 'K-Means',
+  apriori: 'Apriori',
+  naive_bayes: 'Naive Bayes',
+}
+
 export default function Mining() {
   const [tab, setTab] = useState('kmeans')
   const [k, setK] = useState('3')
-  const [minSupport, setMinSupport] = useState('0.1')
-  const [minConfidence, setMinConfidence] = useState('0.3')
   const [results, setResults] = useState({})
   const [error, setError] = useState('')
   const [busy, setBusy] = useState('')
@@ -77,13 +79,6 @@ export default function Mining() {
         const { data } = await api.post('/mining/kmeans', { k: parsedK })
         setResults((prev) => ({ ...prev, kmeans: data }))
         recordRun(data)
-      } else if (tab === 'apriori') {
-        const { data } = await api.post('/mining/apriori', {
-          min_support: Number(minSupport),
-          min_confidence: Number(minConfidence),
-        })
-        setResults((prev) => ({ ...prev, apriori: data }))
-        recordRun(data)
       } else {
         const { data } = await api.post('/mining/naive-bayes')
         setResults((prev) => ({ ...prev, naive_bayes: data }))
@@ -98,7 +93,6 @@ export default function Mining() {
 
   const busyLabel = {
     kmeans: 'Running K-Means…',
-    apriori: 'Generating association rules…',
     naive_bayes: 'Training Naive Bayes…',
   }
 
@@ -106,7 +100,7 @@ export default function Mining() {
     <div>
       <PageHeader
         title="Mining"
-        subtitle="Three data-mining views over your history. The backend does the maths — this page just shows it."
+        subtitle="Two data-mining views over your history. The backend does the maths — this page just shows it."
       />
       <ErrorBanner>{error}</ErrorBanner>
 
@@ -150,36 +144,6 @@ export default function Mining() {
           </div>
         )}
 
-        {tab === 'apriori' && (
-          <div className="flex flex-wrap items-end gap-4">
-            <Field
-              id="min-support"
-              label="Minimum support"
-              hint="0–1, e.g. 0.1 = 10%"
-              type="number"
-              step="0.05"
-              min="0.01"
-              max="1"
-              value={minSupport}
-              onChange={(event) => setMinSupport(event.target.value)}
-            />
-            <Field
-              id="min-confidence"
-              label="Minimum confidence"
-              hint="0–1, e.g. 0.3 = 30%"
-              type="number"
-              step="0.05"
-              min="0.01"
-              max="1"
-              value={minConfidence}
-              onChange={(event) => setMinConfidence(event.target.value)}
-            />
-            <Button onClick={run} disabled={busy === 'apriori'}>
-              {busy === 'apriori' ? 'Generating…' : 'Run Apriori'}
-            </Button>
-          </div>
-        )}
-
         {tab === 'naive_bayes' && (
           <div className="flex flex-wrap items-end gap-4">
             <p className="max-w-md text-sm text-slate-400">
@@ -216,23 +180,6 @@ export default function Mining() {
             ))}
           </div>
         </div>
-      )}
-
-      {tab === 'apriori' && results.apriori && !busy && (
-        <Card className="mt-4">
-          <p className="text-sm text-slate-400">
-            {results.apriori.transaction_count} catalogue movies as transactions ·{' '}
-            {results.apriori.frequent_itemset_count} frequent itemsets ·{' '}
-            {results.apriori.rules.length} rules
-          </p>
-          {results.apriori.message ? (
-            <p className="mt-3 text-sm text-slate-300">{results.apriori.message}</p>
-          ) : (
-            <div className="mt-4">
-              <RuleTable rules={results.apriori.rules} />
-            </div>
-          )}
-        </Card>
       )}
 
       {tab === 'naive_bayes' && results.naive_bayes && !busy && (
@@ -301,7 +248,7 @@ export default function Mining() {
                 className="flex items-center justify-between border-b border-slate-800/70 pb-2 text-sm last:border-0 last:pb-0"
               >
                 <span className="text-slate-300">
-                  {TABS.find((t) => t.id === item.algorithm)?.label || item.algorithm}
+                  {HISTORY_LABELS[item.algorithm] || item.algorithm}
                 </span>
                 <span className="text-xs text-slate-500">
                   {new Date(item.created_at).toLocaleString()}

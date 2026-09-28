@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import DATA_DIR, MOVIES_CSV, UPLOAD_DIR
 from app.database.connection import init_db
+from app.database.seed import seed_movies, seed_demo_user
 from app.errors import UserError
 from app.routes import analytics, auth, mining, movies, recommendations, upload
 
@@ -19,7 +20,6 @@ async def lifespan(app: FastAPI):
 
     from app.database.repositories import MovieRepository
     from app.database.connection import connect
-    from app.database.seed import seed_movies
 
     conn = connect()
     try:
@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
         conn.close()
     if needs_seed and os.path.exists(MOVIES_CSV):
         seed_movies()
+    seed_demo_user()
     yield
 
 
@@ -40,7 +41,11 @@ def user_error_handler(request, error: UserError):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+    ] + [o.strip() for o in os.environ.get("CINEMINE_CORS_ORIGINS", "").split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -15,7 +15,7 @@ export default function Upload() {
   const [busy, setBusy] = useState(false)
   const [busyKind, setBusyKind] = useState('csv')
 
-  const handleFile = async (kind) => async (event) => {
+  const handleFile = (kind) => async (event) => {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
