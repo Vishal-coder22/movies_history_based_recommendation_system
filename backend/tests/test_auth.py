@@ -98,3 +98,26 @@ def test_password_is_stored_hashed(client):
     assert row is not None
     assert row[0] != "secret123"
     assert row[0].startswith("$2b$") or row[0].startswith("$2y$")
+
+
+def test_seed_demo_user_idempotent(db):
+    from app.database.seed import seed_demo_user
+    from app.database.repositories import UserRepository
+    from app.database.connection import connect
+
+    # First call creates the user
+    uid1 = seed_demo_user()
+    assert uid1 is not None
+
+    conn = connect()
+    try:
+        user = UserRepository.get_by_email(conn, "demo@cinemine.dev")
+        assert user is not None
+        assert user["email"] == "demo@cinemine.dev"
+        assert user["name"] == "Demo User"
+    finally:
+        conn.close()
+
+    # Second call returns None (idempotent)
+    uid2 = seed_demo_user()
+    assert uid2 is None

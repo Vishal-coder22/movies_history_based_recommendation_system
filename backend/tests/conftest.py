@@ -17,6 +17,8 @@ os.environ["CINEMINE_SEED_CSV"] = os.path.join(
 )
 # Fast hashing for tests (the app default remains the production-safe value).
 os.environ.setdefault("CINEMINE_BCRYPT_ROUNDS", "4")
+# Disable demo user seeding in tests to avoid user_id conflicts.
+os.environ["CINEMINE_SEED_DEMO"] = "0"
 atexit.register(shutil.rmtree, _TEST_DIR, ignore_errors=True)
 
 import pytest  # noqa: E402

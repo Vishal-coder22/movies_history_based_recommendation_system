@@ -14,8 +14,14 @@ from app.routes import analytics, auth, mining, movies, recommendations, upload
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+    except OSError:
+        pass
+    try:
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+    except OSError:
+        pass
     init_db()
 
     from app.database.repositories import MovieRepository
@@ -28,7 +34,9 @@ async def lifespan(app: FastAPI):
         conn.close()
     if needs_seed and os.path.exists(MOVIES_CSV):
         seed_movies()
-    seed_demo_user()
+    from app.config import SEED_DEMO_USER
+    if SEED_DEMO_USER:
+        seed_demo_user()
     yield
 
 

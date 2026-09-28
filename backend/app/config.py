@@ -9,7 +9,9 @@ MOVIES_CSV = os.environ.get("CINEMINE_SEED_CSV") or os.path.join(SEED_DIR, "tmdb
 UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
 
 MAX_MASTER_MOVIES = 5000
-MAX_FILE_SIZE_MB = 10
+MAX_FILE_SIZE_MB = int(os.environ.get("CINEMINE_MAX_FILE_MB", "10"))
+
+SEED_DEMO_USER = os.environ.get("CINEMINE_SEED_DEMO", "1") == "1"
 
 JWT_SECRET = os.environ.get(
     "CINEMINE_JWT_SECRET", "cinemine-local-dev-secret-0123456789abcdef"

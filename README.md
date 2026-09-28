@@ -145,5 +145,46 @@ moviesforfuture/
 ├── logs/                    # server logs written by start.ps1 (git-ignored)
 ├── start.ps1                # ONE command: start backend + frontend, ENTER stops both
 ├── stop.ps1                 # ONE command: stop everything, frees ports
-└── test.ps1                 # run the test suite
+├── test.ps1                 # run the test suite
+└── deploy.ps1               # ONE command: redeploy both to Vercel
 ```
+
+## Deployment (Vercel + Turso — free, no credit card)
+
+**Live URLs:**
+- Frontend: https://frontend-zeta-ruddy-93.vercel.app
+- Backend:  https://backend-delta-vert-20.vercel.app
+- Demo login: `demo@cinemine.dev` / `secret123`
+
+**Architecture:** Vercel (2 projects) + Turso (serverless SQLite)
+- Backend: `backend/` root → FastAPI (Python 3.12, 354 MB bundle)
+- Frontend: `frontend/` root → Vite/React (SPA rewrite)
+- DB: Turso free tier (no card), seeded once with 4,803 movies + 11,927 genre rows
+
+**Environment variables (set on Vercel projects):**
+
+| Project | Variable | Value |
+|---------|----------|-------|
+| Backend | `TURSO_DATABASE_URL` | `libsql://...` (from `turso db create`) |
+| Backend | `TURSO_AUTH_TOKEN` | from `turso db tokens create` |
+| Backend | `CINEMINE_JWT_SECRET` | random string (auto-generated) |
+| Backend | `CINEMINE_MAX_FILE_MB` | `4` (Vercel body limit is 4.5 MB) |
+| Backend | `MPLCONFIGDIR` | `/tmp` (matplotlib font cache) |
+| Backend | `CINEMINE_CORS_ORIGINS` | `https://frontend-zeta-ruddy-93.vercel.app` |
+| Frontend | `VITE_API_URL` | `https://backend-delta-vert-20.vercel.app/api` |
+
+**Redeploy after code changes:**
+```powershell
+.\deploy.ps1
+```
+
+**One-time setup (already done):**
+1. `vercel login`
+2. `irm get.tur.so/install.ps1 | iex` → `turso auth signup` (GitHub) → `turso db create cinemine` → `turso db tokens create cinemine`
+3. Run `backend/scripts/seed_turso.py` (batched multi-row INSERTs, ~2 min)
+
+**Limits & notes:**
+- Vercel Hobby: 500 MB Python bundle limit (ours: 354 MB ✅), 4.5 MB request body limit (upload limit set to 4 MB for friendly errors)
+- `MAX_FILE_SIZE_MB=10` locally → `4` on Vercel
+- Cold start: ~5-8 s (pandas/sklearn imports + Turso count check). Pre-seeded DB skips movie import.
+- `start.ps1` / `stop.ps1` / `test.ps1` unchanged for local dev.
